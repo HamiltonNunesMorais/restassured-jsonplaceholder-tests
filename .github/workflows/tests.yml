@@ -1,0 +1,40 @@
+name: Run API Tests with Allure
+
+on:
+  workflow_dispatch:   # só roda manualmente
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Run tests
+        run: mvn clean test
+
+      - name: Generate Allure report
+        run: mvn allure:report
+
+      - name: Add environment info
+        run: |
+          echo "OS=${{ runner.os }}" > target/allure-results/environment.properties
+          echo "Java=21" >> target/allure-results/environment.properties
+          echo "API Base URL=https://jsonplaceholder.typicode.com" >> target/allure-results/environment.properties
+          echo "Branch=${{ github.ref_name }}" >> target/allure-results/environment.properties
+          echo "Commit=${{ github.sha }}" >> target/allure-results/environment.properties
+          echo "Executor=GitHub Actions" >> target/allure-results/environment.properties
+          echo "Build=1.0-SNAPSHOT" >> target/allure-results/environment.properties
+
+      - name: Upload Allure report artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-report
+          path: target/site/allure-maven-plugin
