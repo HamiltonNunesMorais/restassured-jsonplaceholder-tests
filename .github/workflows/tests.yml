@@ -17,6 +17,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      # Step OWASP Dependency-Check
+      - name: OWASP Dependency Check
+        run: mvn org.owasp:dependency-check-maven:check
+
+      # Se passou na auditoria, roda os testes
       - name: Run tests
         run: mvn clean test
 
